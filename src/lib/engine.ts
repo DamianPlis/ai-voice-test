@@ -4,6 +4,15 @@ export const MAX_TTS_TEXT_LENGTH = 2500;
 export const MAX_CHATTERBOX_TEXT_LENGTH = 200;
 export const MAX_KOKORO_CHUNK_LENGTH = 200;
 
+export async function createKokoroTextStream(text: string) {
+  const { TextSplitterStream } = await import('kokoro-js');
+  const splitter = new TextSplitterStream();
+  splitter.push(text);
+  // Kokoro's string overload stays open; close the splitter to finish the batch.
+  splitter.close();
+  return splitter;
+}
+
 /** Split long text at word boundaries without dropping whitespace or punctuation. */
 export function splitTtsText(text: string, maxLength = MAX_KOKORO_CHUNK_LENGTH): string[] {
   if (!Number.isSafeInteger(maxLength) || maxLength < 1) {

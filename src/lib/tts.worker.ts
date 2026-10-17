@@ -1,5 +1,5 @@
 import { getModel } from './models';
-import { MAX_CHATTERBOX_TEXT_LENGTH, MAX_KOKORO_CHUNK_LENGTH, splitTtsText, validateTtsText } from './engine';
+import { MAX_CHATTERBOX_TEXT_LENGTH, MAX_KOKORO_CHUNK_LENGTH, createKokoroTextStream, splitTtsText, validateTtsText } from './engine';
 import type { TtsRequest, TtsResponse } from './engine';
 import type { TtsDevice, TtsDtype } from './models';
 import { loadChatterbox } from './chatterbox';
@@ -14,7 +14,7 @@ type KokoroSession = {
   model: { dispose(): Promise<void> };
   voices: Readonly<Record<string, unknown>>;
   tokenizer: (text: string, options: { truncation: false }) => { input_ids: { dims: number[] } };
-  stream: (text: string, options: { voice: string; speed: number }) => AsyncIterable<{
+  stream: (text: import('kokoro-js').TextSplitterStream, options: { voice: string; speed: number }) => AsyncIterable<{
     text: string;
     phonemes: string;
     audio: { audio: Float32Array };
@@ -64,7 +64,8 @@ function concatenateAudio(parts: Float32Array[]): Float32Array {
 async function generateKokoroAudio(tts: KokoroSession, text: string, voice: string, speed: number): Promise<Float32Array> {
   const parts: Float32Array[] = [];
   const synthesize = async (segmentText: string): Promise<void> => {
-    for await (const segment of tts.stream(segmentText, { voice, speed })) {
+    const splitter = await createKokoroTextStream(segmentText);
+    for await (const segment of tts.stream(splitter, { voice, speed })) {
       const { input_ids } = tts.tokenizer(segment.phonemes, { truncation: false });
       const tokenCount = input_ids.dims[input_ids.dims.length - 1] ?? 0;
       if (tokenCount > MAX_KOKORO_INPUT_TOKENS) {
