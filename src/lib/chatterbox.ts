@@ -123,7 +123,12 @@ export async function loadChatterbox(
   device: 'wasm' | 'webgpu',
   progress_callback: ProgressCallback,
 ): Promise<ChatterboxSession> {
-  const { AutoProcessor, ChatterboxModel, Tensor } = await loadTransformers();
+  const { AutoProcessor, ChatterboxModel, Tensor, env } = await loadTransformers();
+  const ort = env.backends.onnx;
+  if (ort?.wasm && ort.versions?.web) {
+    ort.wasm.wasmPaths = { wasm: `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ort.versions.web}/dist/ort-wasm-simd-threaded.asyncify.wasm` };
+    env.useWasmCache = false;
+  }
   let hasShaderF16 = false;
   if (device === 'webgpu') {
     const gpu = (globalThis.navigator as Navigator & {

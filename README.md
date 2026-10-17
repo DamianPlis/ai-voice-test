@@ -36,7 +36,7 @@ An arbitrary Hugging Face checkpoint or Python `.pt` file cannot be used directl
 
 ## Audio and privacy
 
-- Scripts, reference audio, and synthesis stay on your device. Hugging Face receives requests for model assets.
+- Scripts, reference audio, and synthesis stay on your device. Hugging Face receives model asset requests; Chatterbox fetches its versioned ONNX runtime binary from jsDelivr because the host limits individual files to 25 MiB.
 - Models use the browser cache. Cache eviction and private browsing can require another download. This is not a guaranteed offline-installable PWA.
 - The latest 20 generated WAVs, their scripts, and measured metadata are saved in this browser's IndexedDB. Export WAVs you want to keep. Clearing site data also removes history and cached models.
 - The waveform comes from generated PCM. Runtime reports measured generation time, duration, sample rate, and real-time factor. Model loading is excluded from generation time.
