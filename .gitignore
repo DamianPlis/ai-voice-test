@@ -3,6 +3,8 @@ dist/
 *.local
 *.log
 .sites/
+.openai/
+.vercel/
 *.zip
 *.tsbuildinfo
 resonance-site.tar.gz
